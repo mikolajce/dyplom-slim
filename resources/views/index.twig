@@ -1,0 +1,58 @@
+{% extends 'base.twig' %}
+
+{% block body %}
+    <div>
+        <h1>
+            Analiza wydajności środowisk wspierających tworzenie bazodanowych aplikacji internetowych na platformie PHP
+        </h1>
+        <h1>
+            Środowisko:
+            <strong>
+                <a href="http://slimframework.com">
+                    Slim
+                </a>
+            </strong>
+        </h1>
+    </div>
+
+    <div>
+        <article>
+            <p>
+                Przykładowe testy bazy danych
+            </p>
+            <p>
+                <a href="/products">
+                    Wszystkie produkty
+                </a>
+            </p>
+            <p>
+                <a href="/clients">
+                    Wszyscy użytkownicy
+                </a>
+            </p>
+            <p>
+                <a href="/orders">
+                    Wszystkie zamówienia zamówienia
+                </a>
+            </p>
+            <p>
+                <a href="/orders/status/2">
+                    Przetwarzane zamówienia
+                </a>
+            </p>
+        </article>
+        <article>
+            <h1>
+                Losowy produkt
+            </h1>
+            <h1>
+                {{ product.name }} -
+                <a href="/products/{{ product.product_id }}">
+                    szczegóły
+                </a>
+            </h1>
+            <p>
+            </p>
+        </article>
+    </div>
+{% endblock %}

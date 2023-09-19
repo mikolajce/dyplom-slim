@@ -1,0 +1,27 @@
+{% extends 'base.twig' %}
+
+{% block body %}
+    <div>
+        <h1>
+            Lista wszystkich użytkowników
+        </h1>
+    </div>
+    <div>
+        {% for key, client in clients %}
+            <article>
+                <h1>
+                    <a href="/clients/{{ client.client_id }}">
+                        {{ client.name }} {{ client.surname }}
+                    </a>
+                </h1>
+                <p>
+                    Adres: <strong>{{ client.address }}</strong>
+                </p>
+            </article>
+        {% else %}
+            <h3>
+                Nie znaleziono uzytkowników o podanych kryteriach
+            </h3>
+        {% endfor %}
+    </div>
+{% endblock %}

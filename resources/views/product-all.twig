@@ -1,0 +1,33 @@
+{% extends 'base.twig' %}
+
+{% block body %}
+    <div>
+        <h1>
+            Lista wszystkich produktów
+        </h1>
+    </div>
+    <div>
+        {% for key, product in products %}
+            <article>
+                <h1>
+                    <a href="/products/{{ product.product_id }}">
+                        {{ product.name }}
+                    </a>
+                </h1>
+                <p>
+                    Producent:
+                    <strong>
+                        {{ product.manufacturer }}
+                    </strong>
+                </p>
+                <p>
+                    Cena: {{ product.price }} zł
+                </p>
+            </article>
+        {% else %}
+            <h3>
+                Nie znaleziono produktów o podanych kryteriach
+            </h3>
+        {% endfor %}
+    </div>
+{% endblock %}

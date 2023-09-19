@@ -1,0 +1,33 @@
+{% extends 'base.twig' %}
+
+{% block body %}
+    <div>
+        <h1>
+            Lista wszystkich zamówień
+        </h1>
+    </div>
+    <div>
+        {% for key, order in orders %}
+            <article>
+                <h1>
+                    <a href="/orders/{{ order.order_id }}">
+                        Zamówienie #{{ order.order_id }}
+                    </a>
+                </h1>
+                <p>
+                    Cena:
+                    <strong>
+                        {{ order.sum_total }}
+                    </strong>
+                </p>
+                <p>
+                    Kod statusu: {{ order.status_id }}
+                </p>
+            </article>
+        {% else %}
+            <h3>
+                Nie znaleziono produktów o podanych kryteriach
+            </h3>
+        {% endfor %}
+    </div>
+{% endblock %}
