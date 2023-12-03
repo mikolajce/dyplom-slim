@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<script>
+    let renderStart = new Date().getTime();
+    window.onload = function () {
+        let elapsed = new Date().getTime() - renderStart;
+        document.cookie = "time=" + elapsed
+        location.href = '/orders/' + Math.floor(Math.random() * 100)
+    };
+</script>
     <html>
     <head>
         <meta charset="UTF-8">

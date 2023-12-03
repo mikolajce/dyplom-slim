@@ -1,51 +1,38 @@
 <?php
 
 namespace Controller;
+use Slim\Psr7\Response;
 
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\App;
-
-class HomeController
+class HomeController extends Controller
 {
-    public function __construct()
+    public function __construct($app)
     {
-    }
-    private $app;
-
-    public function setApp($app){
-        $this->app = $app;
+        parent::__construct($app);
     }
 
-    public function process(Request $request, Response $response): Response
-    {
-        $data = $this->app->get('database')
+    public function __invoke($twig, $db = null): Response {
+        $pid = random_int(1,500);
+        $cid = random_int(1,50);
+        $oid = random_int(1,100);
+
+        $data = $db
             ->get(
                 'product', [
+                'product_id',
                 'name',
-                'manufacturer',
-                'price',
-                'stock',
             ], [
-                'product_id' => random_int(1,500)
+                'product_id' => $pid
             ]);
 
-        $data = $this->app->get('database')->select('product','*');
-        $response->getBody()->write(TwigLoader::render(
-            '/home/index.twig', [
-            'name' => ''
-        ]));
+        $response = new Response();
+        $response->getBody()->write(
+            $twig->render('index.twig',[
+                'product' => $data,
+                'pid' => $pid,
+                'cid' => $cid,
+                'oid' => $oid
+            ]));
         return $response;
     }
 
-//    public function __invoke(Request $request, Response $response, App $app): Response
-//    {
-//        process($app, $response);
-//        $app->getContainer()->get('database')->select('product','*');
-//        $response->getBody()->write(TwigLoader::render(
-//            '/home/index.twig', [
-//                'name' => ''
-//            ]));
-//        return $response;
-//    }
 }

@@ -2,44 +2,51 @@
 
 declare(strict_types=1);
 
+use Controller\HomeController;
+use Controller\WelcomeController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
-use Twig\Environment as Twig;
-use Twig\Loader\FilesystemLoader;
 
 return function (App $app)
 {
-    // Prepare Twig engine
-    $loader = new FilesystemLoader('resources/views');
-    $twig = new Twig($loader,[
-        'cache' => false
-    ]);
+    $db = $app->getContainer()->get('database');
+    $twig = $app->getContainer()->get('view');
+    $app->addErrorMiddleware(true,true,true);
 
-//    Autoload required controllers
-//    foreach(glob(__DIR__ . '/../resources/controllers/*.php') as $file) require $file;
+    foreach(glob(__DIR__ . '/../resources/controllers/*.php') as $file) require $file;
 
-    $app->get('/', function (Request $request, Response $response) use ($twig) {
+//    $app->get('/', function (Request $request, Response $response) use ($db, $twig, $homecontroller, $rrr) {
+//
+//        $pid = random_int(1,500);
+//        $cid = random_int(1,50);
+//        $oid = random_int(1,100);
+//
+//        $data = $db
+//            ->get(
+//                'product', [
+//                    'product_id',
+//                    'name',
+//                ], [
+//                    'product_id' => $pid
+//                ]);
+//
+//        $response->getBody()->write(
+//            $twig->render('index.twig',[
+//                'product' => $data,
+//                'pid' => $pid,
+//                'cid' => $cid,
+//                'oid' => $oid
+//            ]));
+//        return $homecontroller($db,$twig);
+//    });
 
-        $data = $this->get('database')
-            ->get(
-                'product', [
-                    'product_id',
-                    'name',
-                ], [
-                    'product_id' => random_int(1,500)
-                ]);
+    $homecontroller = new HomeController($app);
+    $app->get('/', fn(Request $request, Response $response) => $homecontroller($twig, $db));
 
-        $response->getBody()->write(
-            $twig->render('index.twig',[
-                'product' => $data
-            ]));
-        return $response;
-    });
+    $app->get('/products', function (Request $request, Response $response) use ($db, $twig) {
 
-    $app->get('/products', function (Request $request, Response $response) use ($twig) {
-
-        $data = $this->get('database')
+        $data = $db
             ->select(
                 'product',[
                     'product_id',
@@ -57,9 +64,9 @@ return function (App $app)
         return $response;
     });
 
-    $app->get('/products/{id}', function (Request $request, Response $response, array $args) use ($twig){
+    $app->get('/products/{id}', function (Request $request, Response $response, array $args) use ($db, $twig){
 
-        $data = $this->get('database')
+        $data = $db
             ->get(
                 'product', [
                 'name',
@@ -78,9 +85,9 @@ return function (App $app)
         return $response;
     });
 
-    $app->get('/clients', function (Request $request, Response $response) use ($twig) {
+    $app->get('/clients', function (Request $request, Response $response) use ($db, $twig) {
 
-        $data = $this->get('database')
+        $data = $db
             ->select(
                 'client',[
                     'client_id',
@@ -98,9 +105,9 @@ return function (App $app)
         return $response;
     });
 
-    $app->get('/clients/{id}', function (Request $request, Response $response, array $args) use ($twig) {
+    $app->get('/clients/{id}', function (Request $request, Response $response, array $args) use ($db, $twig) {
 
-        $data = $this->get('database')
+        $data = $db
             ->get(
                 'client', [
                     'client_id',
@@ -120,9 +127,9 @@ return function (App $app)
         return $response;
     });
 
-    $app->get('/orders', function (Request $request, Response $response) use ($twig){
+    $app->get('/orders', function (Request $request, Response $response) use ($db, $twig){
 
-        $data = $this->get('database')
+        $data = $db
             ->select(
                 'order',[
                     'order_id',
@@ -140,70 +147,75 @@ return function (App $app)
         return $response;
     });
 
-    $app->get('/orders/{id}', function (Request $request, Response $response, array $args) use ($twig){
+    $app->get('/orders/{id}', function (Request $request, Response $response, array $args) use ($db, $twig){
 
-        $order = $this->get('database')
-            ->select(
-                'order',
-                '*',
-                [
-                    'order_id' => $args['id']
-                ]);
+        $start = microtime(true);
 
-        $data = $this->get('database')
-            ->select(
-                'order',
+        $order = $db
+            ->get('order',
                 [
-                    '[<>]client' => ['client_id' => 'client_id']
+                    '[>]client' => ['client_id' => 'client_id'],
+                    '[>]status' => ['status_id' => 'status_id']
                 ],
-//                '*',
-//                [
-//                    'order_id',
-//                    'status_id',
-//                    'sum_total',
-//                    'name',
-//                    'surname',
-//                    'address'
-//                ]
                 '*',
-                [
-                    'order_id' => $args['id']
-                ]
+                ['order_id' => $args['id']]
             );
 
-        echo '<br>';
-        var_dump($order);
-        echo '<br>';
+        $products = $db
+            ->select('product',
+                ['[>]cart' =>
+                    ['product_id' => 'product_id']
+                ],
+                '*',
+                ['order_id' => $args['id']]
+            );
 
-        var_dump($data);
+        $time = floor(100000*(microtime(true) - $start))/100;
+        file_put_contents(__DIR__ . '/../public/slim_dbs.txt', $time.PHP_EOL, FILE_APPEND);
+        file_put_contents(__DIR__ . '/../public/slim_views.txt', htmlspecialchars($_COOKIE["time"]).PHP_EOL, FILE_APPEND);
 
         $response->getBody()
             ->write($twig->render(
                 '/orders-detail.twig', [
                 'id' => $args['id'],
                 'order' => $order,
+                'products' => $products
             ]));
         return $response;
     });
 
-    $app->get('/orders/status/{id}', function (Request $request, Response $response, array $args) use ($twig){
+    $app->get('/orders/status/{id}', function (Request $request, Response $response, array $args) use ($db, $twig){
 
-        $data = $this->get('database')
+        $data = $db
             ->select(
-                'order',[
-                'order_id',
-                'status_id',
-                'client_id',
-                'sum_total'
-            ],[
-                'status_id' => $args['id']
+                'order',
+                [
+                    'order_id',
+                    'status_id',
+                    'client_id',
+                    'sum_total'
+                ],[
+                    'status_id' => $args['id']
             ]);
+
+        $status = $this->get('database')
+            ->select(
+                'status',
+                [
+                    'code'
+                ], [
+                    'status_id' => $args['id']
+                ]
+            );
+
+
+        $status = current(current($status));
 
         $response->getBody()
             ->write($twig->render(
                 '/orders-status.twig', [
                 'name' => '',
-                'status' => $args['id'],
+                'status' => $status,
                 'orders' => $data
             ]));
         return $response;

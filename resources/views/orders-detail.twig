@@ -5,21 +5,75 @@
         <h1>
             Szczegóły zamówienia #{{ id }}
         </h1>
-        <article>
+        {% if order == null %}
+            <article>
+                <h1>
+                    Brak zamówienia w bazie
+                </h1>
+            </article>
+        {% else %}
+            <article>
+                <h1>
+                    Dane klienta
+                </h1>
+                <p>
+                    <a href="/clients/{{ order.client_id }}">
+                        {{ order.name }} {{ order.surname }}
+                    </a>
+                    , identyfikator #{{ order.client_id }}
+                </p>
+                <p>
+                    Adres:
+                    <strong>
+                        {{ order.address }}
+                    </strong>
+                </p>
+                <p>
+                    Do zapłaty:
+                    <strong>
+                        {{ order.sum_total }} zł
+                    </strong>
+                </p>
+                <p>
+                    Status zamówienia:
+                    <strong>
+                        <a href="/orders/status/{{ order.status_id }}">
+                            {{ order.code }}
+                        </a>
+                    </strong>
+                    - {{ order.description }}
+                </p>
+            </article>
             <h1>
-                {{ order.sum_total }} {{ client.surname }}, ID #{{ client.client_id }}
+                Produkty
             </h1>
-            <p>
-                Adres:
-                <strong>
-                    {{ client.address }}
-                </strong>
-            </p>
-            <h3>
-                <a href="/clients">
-                    Powrót
-                </a>
-            </h3>
-        </article>
+            {% for key, product in products %}
+                <article>
+                    <h1>
+                        <a href="/products/{{ product.product_id }}">
+                            {{ product.name }}
+                        </a>
+                    </h1>
+                    <p>
+                        Producent:
+                        <strong>
+                            {{ product.manufacturer }}
+                        </strong>
+                    </p>
+                    <p>
+                        Cena: {{ product.price }} zł
+                    </p>
+                </article>
+            {% else %}
+                <h3>
+                    Zamówienie jest puste
+                </h3>
+            {% endfor %}
+        {% endif %}
+        <h3>
+            <a href="/orders">
+                Powrót
+            </a>
+        </h3>
     </div>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block body %}
     <div>
         <h1>
-            Lista wszystkich zamówień o statusie #{{ status }}
+            Lista wszystkich zamówień o statusie: {{ status }}
         </h1>
     </div>
     <div>
@@ -17,11 +17,8 @@
                 <p>
                     Cena:
                     <strong>
-                        {{ order.sum_total }}
+                        {{ order.sum_total }} zł
                     </strong>
-                </p>
-                <p>
-                    Kod statusu: {{ order.status_id }}
                 </p>
             </article>
         {% else %}
